@@ -67,6 +67,7 @@ if ($user_id) {
 <h1>Clothing Adda</h1>
 </div>
 
+<button class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('active')">☰</button>
 <nav>
 <ul class="nav-links">
 
@@ -76,21 +77,25 @@ if ($user_id) {
 <li><a href="#about">About</a></li>
 
 <?php if (isset($_SESSION['user_id'])): ?>
-
-<li style="color:#ff6a00; font-weight:600;">
-Hello, <?= htmlspecialchars($user['name']); ?>
-</li>
-
-<li><a href="orders.php">My Orders</a></li>
-<li><a href="cart.php">Cart</a></li>
-<li><a href="profile.php">Profile</a></li>
-<li><a href="logout.php">Logout</a></li>
-
+    <?php 
+        $uname = $_SESSION['user_name'] ?? 'User';
+        $initial = strtoupper(substr($uname, 0, 1));
+    ?>
+    <li>
+        <div class="user-dropdown">
+            <div class="user-avatar"><?= $initial ?></div>
+            <?= htmlspecialchars($uname) ?> ▾
+            <div class="dropdown-menu">
+                <a href="profile.php">👤 My Profile</a>
+                <a href="orders.php">📦 My Orders</a>
+                <a href="cart.php">🛒 My Cart</a>
+                <a href="logout.php">🚪 Logout</a>
+            </div>
+        </div>
+    </li>
 <?php else: ?>
-
-<li><a href="login.php">Login</a></li>
-<li><a href="register.php">Register</a></li>
-
+    <li><a href="login.php">Login</a></li>
+    <li><a href="register.php" class="btn" style="padding:8px 16px; margin-left:10px; color:#fff;">Register</a></li>
 <?php endif; ?>
 
 </ul>
@@ -215,10 +220,53 @@ We provide high-quality and affordable clothing for Men and Women.
 </section>
 
 
-<footer>
-<div class="container">
-<p>&copy; 2026 Clothing Adda. All Rights Reserved.</p>
-</div>
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-top">
+            
+            <div class="footer-col">
+                <h3>Clothing Adda</h3>
+                <p>Your ultimate destination for modern, trendy, and comfortable clothing. We strive to bring the best styles right to your doorstep.</p>
+                <div class="social-icons">
+                    <a href="#">F</a>
+                    <a href="#">T</a>
+                    <a href="#">I</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="products.php">All Products</a></li>
+                    <li><a href="cart.php">My Cart</a></li>
+                    <li><a href="login.php">Login / Register</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Categories</h3>
+                <ul class="footer-links">
+                    <li><a href="men.php">Men's Collection</a></li>
+                    <li><a href="women.php">Women's Collection</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Contact Us</h3>
+                <ul class="footer-links">
+                    <li>📍 123 Fashion Street, NY 10001</li>
+                    <li>📞 +1 234 567 8900</li>
+                    <li>✉️ support@clothingadda.com</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 <strong>Clothing Adda</strong>. All Rights Reserved.</p>
+        </div>
+    </div>
 </footer>
 
 </body>
