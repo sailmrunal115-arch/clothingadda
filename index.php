@@ -105,11 +105,19 @@ if ($user_id) {
 </header>
 
 <section class="hero" id="home">
-<div class="hero-content">
-<h2>Latest Fashion Collection</h2>
-<p>Stylish Clothing for Men & Women</p>
-<a href="products.php" class="btn">Shop Now</a>
-</div>
+    <div class="slideshow">
+        <div class="slide s1"></div>
+        <div class="slide s2"></div>
+        <div class="slide s3"></div>
+        <div class="slide s4"></div>
+        <div class="slide s5"></div>
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h2>Latest Fashion Collection</h2>
+        <p>Stylish Clothing for Men &amp; Women</p>
+        <a href="products.php" class="btn">Shop Now</a>
+    </div>
 </section>
 
 <section class="categories" id="categories">

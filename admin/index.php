@@ -7,6 +7,9 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
+$admin_username = $_SESSION['admin_username'] ?? 'Admin';
+$initial = strtoupper(substr($admin_username, 0, 1));
+
 // Count products
 $product_count = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM products"));
 
@@ -26,8 +29,8 @@ $pending = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as c FROM orde
 $delivered = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as c FROM orders WHERE status='delivered'"))['c'];
 $cancelled = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as c FROM orders WHERE status='cancelled'"))['c'];
 
-// Weekly revenue data (current week)
-$week_revenue = array_fill(0,7,0); // Sun=0 ... Sat=6
+// Weekly revenue data
+$week_revenue = array_fill(0,7,0);
 $orders_this_week = mysqli_query($conn, "
     SELECT total_price, DAYOFWEEK(created_at) as day
     FROM orders
@@ -35,124 +38,144 @@ $orders_this_week = mysqli_query($conn, "
       AND YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)
 ");
 while($row = mysqli_fetch_assoc($orders_this_week)){
-    $day_index = $row['day'] - 1; // DAYOFWEEK: Sunday=1, Saturday=7
+    $day_index = $row['day'] - 1;
     $week_revenue[$day_index] += $row['total_price'];
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | Clothing Adda</title>
     <link rel="stylesheet" href="admin_style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .admin-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            font-family: Arial, sans-serif;
-        }
-        h2 { margin-bottom: 20px; }
-        .btn { 
-            background-color: #e74c3c; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-weight: bold;
-        }
-        .dashboard-card {
-            width: 220px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .dashboard-card h3 { margin-bottom: 10px; }
-        .dashboard-card p { font-size: 1.5em; margin-bottom: 10px; }
-        .dashboard-card .btn { font-size: 0.85em; }
-    </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-        <h2>Dashboard</h2>
-        <a href="logout.php" class="btn">Logout</a>
-    </div>
-
-    <hr><br>
-
-    <div style="display:flex; gap:20px; flex-wrap:wrap;">
-
-        <div class="dashboard-card">
-            <h3>Total Products</h3>
-            <p><?php echo $product_count; ?></p>
-            <a href="products.php" class="btn">Manage Products</a>
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <a href="index.php" class="sidebar-brand">
+                <div class="brand-icon">C</div>
+                Clothing Adda
+            </a>
         </div>
-
-        <div class="dashboard-card">
-            <h3>Total Orders</h3>
-            <p><?php echo $order_count; ?></p>
-            <a href="orders.php" class="btn">Manage Orders</a>
+        <div class="sidebar-menu">
+            <a href="index.php" class="menu-item active">
+                <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                Dashboard
+            </a>
+            <a href="orders.php" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                Orders
+            </a>
+            <a href="products.php" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                Products
+            </a>
+            <a href="add_product.php" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                Add Product
+            </a>
         </div>
-
-        <div class="dashboard-card">
-            <h3>Add Product</h3>
-            <p>+</p>
-            <a href="add_product.php" class="btn">Add New Product</a>
+        <div class="logout-container">
+            <a href="logout.php" class="logout-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                Logout
+            </a>
         </div>
+    </aside>
 
-        <div class="dashboard-card">
-            <h3>Total Revenue</h3>
-            <p>₹<?php echo number_format($revenue,2); ?></p>
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <header class="top-header">
+            <div class="page-title">Store Overview</div>
+            <a href="profile.php" class="admin-profile" style="text-decoration:none;">
+                <span><?= htmlspecialchars($admin_username) ?></span>
+                <div class="admin-avatar"><?= $initial ?></div>
+            </a>
+        </header>
+
+        <div class="content-wrapper">
+            
+            <div class="metric-grid">
+                
+                <a href="products.php" class="metric-card">
+                    <div class="metric-title">Total Products</div>
+                    <div class="metric-value"><?= $product_count ?></div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                </a>
+                
+                <a href="orders.php" class="metric-card">
+                    <div class="metric-title">Total Orders</div>
+                    <div class="metric-value"><?= $order_count ?></div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                </a>
+
+                <div class="metric-card">
+                    <div class="metric-title">Total Revenue</div>
+                    <div class="metric-value" style="color: #10b981;">₹<?= number_format($revenue, 2) ?></div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <text x="50%" y="60%" font-size="18" font-family="Inter, sans-serif" font-weight="800" text-anchor="middle" dominant-baseline="middle">₹</text>
+                    </svg>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-title">Registered Users</div>
+                    <div class="metric-value" style="color: #3b82f6;"><?= $total_users ?></div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Weekly Revenue</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Order Status Distribution</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
         </div>
-
-        <div class="dashboard-card">
-            <h3>Registered Customers</h3>
-            <p><?php echo $total_users; ?></p>
-        </div>
-
-    </div>
-
-    <br><br>
-
-    <div style="display:flex; gap:40px; flex-wrap:wrap;">
-        <div style="width:60%;">
-            <h3>Weekly Revenue</h3>
-            <canvas id="revenueChart"></canvas>
-        </div>
-
-        <div style="width:35%;">
-            <h3>Order Status</h3>
-            <canvas id="statusChart"></canvas>
-        </div>
-    </div>
-
-</div>
+    </main>
 
 <script>
 const weekRevenue = <?php echo json_encode($week_revenue); ?>;
 
 new Chart(document.getElementById("revenueChart"), {
-    type: "line",
+    type: "bar",
     data: {
         labels: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
         datasets: [{
-            label: "Revenue",
+            label: "Revenue (₹)",
             data: weekRevenue,
-            borderColor: "#e74c3c",
-            fill: false,
-            tension: 0.3,
-            pointBackgroundColor: "#e74c3c",
-            pointRadius: 5
+            backgroundColor: "rgba(231, 76, 60, 0.8)",
+            borderRadius: 6,
+            borderWidth: 0
         }]
     },
     options: {
         responsive: true,
         plugins: {
             legend: { display: false },
-            tooltip: { mode: 'index', intersect: false }
         },
         scales: {
-            y: { beginAtZero: true }
+            y: { 
+                beginAtZero: true,
+                grid: {
+                    color: '#f1f5f9'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
         }
     }
 });
@@ -163,12 +186,26 @@ new Chart(document.getElementById("statusChart"), {
         labels: ["Pending","Delivered","Cancelled"],
         datasets: [{
             data: [<?php echo $pending ?>, <?php echo $delivered ?>, <?php echo $cancelled ?>],
-            backgroundColor:["orange","green","red"]
+            backgroundColor:["#f59e0b", "#10b981", "#ef4444"],
+            borderWidth: 0,
+            hoverOffset: 4
         }]
     },
     options: {
         responsive: true,
-        plugins: { legend: { position: 'bottom' } }
+        cutout: '70%',
+        plugins: { 
+            legend: { 
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    font: {
+                        family: 'Inter',
+                        weight: '600'
+                    }
+                }
+            } 
+        }
     }
 });
 </script>
